@@ -1,18 +1,97 @@
-#include <Arduino.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
-// put function declarations here:
-int myFunction(int, int);
+// Definisci i pin I2C utilizzati
+#define I2C_SDA 3  // Modifica con il pin corretto
+#define I2C_SCL 4  // Modifica con il pin corretto
+
+#define POTENTIOMETER 2 
+
+#define UP_BUTTON 1
+#define DOWN_BUTTON 0
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 32
+#define OLED_RESET -1
+
+const uint8_t heart_bmp[] PROGMEM = {
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x3C, 0x3C, 0x00, 0x00, 
+  0x00, 0x00, 0x7E, 0x7E, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x7E, 0x7E, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x3C, 0x3C, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x3C, 0x3C, 0x00, 0x00, 
+  0x00, 0x00, 0x7E, 0x7E, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x7E, 0x7E, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x3C, 0x3C, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+  0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);
 
 void setup() {
-  // put your setup code here, to run once:
-  int result = myFunction(2, 3);
+  Serial.begin(115200); //per il serial monitor
+  Serial.println(F("Setup Iniziato"));
+  Wire.begin(I2C_SDA, I2C_SCL);
+
+
+  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println(F("SSD1306 allocation failed"));
+    for(;;);
+  }
+
+
+  pinMode(UP_BUTTON, INPUT_PULLUP);
+  pinMode(DOWN_BUTTON, INPUT_PULLUP);
+  pinMode(POTENTIOMETER, INPUT);
+
+
+  display.clearDisplay();
+
+  // Mostra il logo
+  display.drawBitmap(0, 0, heart_bmp, 128, 32, SSD1306_WHITE);
+  display.display();
+
+  Serial.println(F("Setup completato"));
+  //display.clearDisplay();
+  //display.setTextSize(1);
+  //display.setTextColor(SSD1306_WHITE);
+  //display.setCursor(0,0);
+  //display.println(F("Hello, world!"));
+  //display.display();
+
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-}
+  int sensorValue = analogRead(POTENTIOMETER);
+  Serial.println(sensorValue);
+  
+  if ((digitalRead(UP_BUTTON) == LOW)) {
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0,0);
+    display.println(F("Up Gear"));
+    display.display();
+  }
 
-// put function definitions here:
-int myFunction(int x, int y) {
-  return x + y;
+  if ((digitalRead(DOWN_BUTTON) == LOW)) {
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(SSD1306_WHITE);
+    display.setCursor(0,0);
+    display.println(F("Down Gear"));
+    display.display();
+  }
+
+  delay(1000);
 }
